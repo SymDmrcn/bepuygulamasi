@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from docx import Document
 
-# 🔐 Firebase kimlik bilgilerini secrets.toml'dan doğrudan al
+# 🔐 Firebase secrets doğrudan al
 firebase_config = st.secrets["firebase_config"]
 cred = credentials.Certificate(firebase_config)
 
