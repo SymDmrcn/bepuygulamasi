@@ -1,16 +1,18 @@
+import json
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 from docx import Document
-import os
 
-# Firebase bağlantısı kurulumu
+# 🔐 Firebase kimliğini Streamlit secrets üzerinden al
+firebase_json = json.loads(st.secrets["firebase_config"])
+cred = credentials.Certificate(firebase_json)
+
 if not firebase_admin._apps:
-    cred_path = os.path.join(os.path.dirname(__file__), "egitimuygulamasi-6a5d7-firebase-adminsdk-fbsvc-2c98e81232.json")
-    cred = credentials.Certificate(cred_path)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
+
 
 # Firestore'dan verileri çekme
 @st.cache_data
