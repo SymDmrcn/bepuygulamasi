@@ -4,7 +4,7 @@ from firebase_admin import credentials, firestore
 import json
 from docx import Document
 
-# 🔐 Firebase bağlantısı
+# Firebase Cloud secrets'tan al
 if not firebase_admin._apps:
     firebase_json = json.loads(st.secrets["firebase_config"])
     cred = credentials.Certificate(firebase_json)
@@ -12,7 +12,7 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
-# 🔽 Firestore'dan hedef verilerini çek
+# Firestore'dan verileri çek
 @st.cache_data
 def verileri_cek():
     hedefler_ref = db.collection('hedefler')
@@ -33,20 +33,21 @@ def verileri_cek():
         }
     return grouped_data
 
-# 🎨 Arayüz
+# Arayüz
 st.set_page_config(page_title="BEP Oluşturucu", layout="centered")
 st.title("📘 Bireyselleştirilmiş Eğitim Planı (BEP)")
 
 grouped_data = verileri_cek()
-teacher = st.text_input("👩‍🏫 Öğretmen Adı")
+teacher = st.text_input("👩‍🏫 Öğreten Adı")
 student = st.text_input("👧 Öğrenci Adı")
 
 if grouped_data:
-    group = st.selectbox("🎯 Grup Seçin", list(grouped_data.keys()))
+    group = st.selectbox("🌟 Grup Seçin", list(grouped_data.keys()))
     lesson = st.selectbox("📚 Ders Seçin", list(grouped_data[group].keys()))
     hedefler = grouped_data[group][lesson]
+
     short_selected = st.multiselect("📝 Kısa Vadeli Hedefler", hedefler["KISA VADELİ HEDEFLER"])
-    long_selected = st.multiselect("🧭 Uzun Vadeli Hedefler", hedefler["UZUN VADELİ HEDEFLER"])
+    long_selected = st.multiselect("🛍 Uzun Vadeli Hedefler", hedefler["UZUN VADELİ HEDEFLER"])
     teach_selected = st.multiselect("📖 Öğretimsel Hedefler", hedefler["ÖĞRETİMSEL HEDEFLER"])
 
     if st.button("📄 Word Belgesi Oluştur"):
@@ -59,6 +60,7 @@ if grouped_data:
             doc.add_paragraph(f"Öğrenci: {student}")
             doc.add_paragraph(f"Grup: {group}")
             doc.add_paragraph(f"Ders: {lesson}")
+
             if short_selected:
                 doc.add_heading("Kısa Vadeli Hedefler", level=2)
                 for hedef in short_selected:
@@ -71,7 +73,11 @@ if grouped_data:
                 doc.add_heading("Öğretimsel Hedefler", level=2)
                 for hedef in teach_selected:
                     doc.add_paragraph(f"- {hedef}")
+
             file_name = f"{student.replace(' ', '_')}_bep.docx"
             doc.save(file_name)
+
             with open(file_name, "rb") as f:
-                st.download_button("📥 Word Belgesini İndir", f, file_name=file_name)
+                st.download_button("📅 Word Belgesini İndir", f, file_name=file_name)
+else:
+    st.warning("Henüz Firestore'dan veri alınamadı.")
