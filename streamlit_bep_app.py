@@ -1,11 +1,10 @@
+import json
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
-from docx import Document
 
-# 🔐 Firebase secrets doğrudan al
 firebase_config = st.secrets["firebase_config"]
-cred = credentials.Certificate(firebase_config)
+cred = credentials.Certificate(dict(firebase_config))
 
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
