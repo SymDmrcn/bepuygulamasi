@@ -2,10 +2,12 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 from docx import Document
+import json
 
-# 🔐 Firebase bağlantısı
+# 🔐 Firebase bağlantısı (secrets üzerinden)
 if not firebase_admin._apps:
-    cred = credentials.Certificate(st.secrets["firebase_config"])
+    firebase_json = json.loads(st.secrets["firebase_config"])
+    cred = credentials.Certificate(firebase_json)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
