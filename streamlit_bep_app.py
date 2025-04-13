@@ -34,7 +34,7 @@ def verileri_cek():
 
 # 🎨 Arayüz
 st.set_page_config(page_title="BEP Oluşturucu", layout="centered")
-st.title("📘 Bireyselleştirilmiş Eğitim Planı (BEP)")
+st.title("📘 TUZLA BİLSEM Bireyselleştirilmiş Eğitim Planı Otomasyonu (BEP)")
 
 grouped_data = verileri_cek()
 
