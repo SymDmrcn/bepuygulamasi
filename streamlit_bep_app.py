@@ -30,8 +30,10 @@ def verileri_cek():
             
         grouped_data[grup][ders] = {
             "KISA VADELİ HEDEFLER": data.get("kisa_vadeli_hedefler", []),
+            "KISA VADELİ HEDEFLER": data.get("kısa_vadeli_hedefler", []),
             "UZUN VADELİ HEDEFLER": data.get("uzun_vadeli_hedefler", []),
             "ÖĞRETİMSEL HEDEFLER": data.get("ogretimsel_hedefler", [])
+            "ÖĞRETİMSEL HEDEFLER": data.get("öğretimsel_hedefler", [])
         }
     
     return grouped_data
