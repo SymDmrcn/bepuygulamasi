@@ -10,7 +10,7 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Cache'e TTL ekle (5 dakikada bir yenilenir)
+# Cache'e TTL ekle (30 saniyede bir yenilenir)
 @st.cache_data(ttl=30)
 def verileri_cek():
     hedefler_ref = db.collection('hedefler')
@@ -27,13 +27,21 @@ def verileri_cek():
             
         if grup not in grouped_data:
             grouped_data[grup] = {}
-            
+        
+        # Kısa vadeli hedefleri birleştir
+        kisa_vadeli = []
+        kisa_vadeli.extend(data.get("kisa_vadeli_hedefler", []))
+        kisa_vadeli.extend(data.get("kısa_vadeli_hedefler", []))
+        
+        # Öğretimsel hedefleri birleştir  
+        ogretimsel = []
+        ogretimsel.extend(data.get("ogretimsel_hedefler", []))
+        ogretimsel.extend(data.get("öğretimsel_hedefler", []))
+        
         grouped_data[grup][ders] = {
-            "KISA VADELİ HEDEFLER": data.get("kisa_vadeli_hedefler", []),
-            "KISA VADELİ HEDEFLER": data.get("kısa_vadeli_hedefler", []),
-            "UZUN VADELİ HEDEFLER": data.get("uzun_vadeli_hedefler", []),
-            "ÖĞRETİMSEL HEDEFLER": data.get("ogretimsel_hedefler", []),
-            "ÖĞRETİMSEL HEDEFLER": data.get("öğretimsel_hedefler", [])
+            "KISA_VADELI_HEDEFLER": list(set(kisa_vadeli)),  # Dublicateleri kaldır
+            "UZUN_VADELI_HEDEFLER": data.get("uzun_vadeli_hedefler", []),
+            "OGRETIMSEL_HEDEFLER": list(set(ogretimsel))  # Dublicateleri kaldır
         }
     
     return grouped_data
@@ -42,7 +50,7 @@ def verileri_cek():
 st.set_page_config(page_title="BEP Oluşturucu", layout="centered")
 st.title("📘 TUZLA BİLSEM Bireyselleştirilmiş Eğitim Planı Otomasyonu (BEP)")
 
-# Cache temizleme butonu ekle (geliştirme aşamasında kullanışlı)
+# Cache temizleme butonu
 if st.sidebar.button("🔄 Verileri Yenile"):
     st.cache_data.clear()
     st.rerun()
@@ -58,9 +66,10 @@ if grouped_data:
     
     hedefler = grouped_data[group][lesson]
     
-    short_selected = st.multiselect("📝 Kısa Vadeli Hedefler", hedefler["KISA VADELİ HEDEFLER"])
-    long_selected = st.multiselect("🧭 Uzun Vadeli Hedefler", hedefler["UZUN VADELİ HEDEFLER"])
-    teach_selected = st.multiselect("📖 Öğretimsel Hedefler", hedefler["ÖĞRETİMSEL HEDEFLER"])
+    # Düzeltilmiş multiselect'ler
+    short_selected = st.multiselect("📝 Kısa Vadeli Hedefler", hedefler["KISA_VADELI_HEDEFLER"])
+    long_selected = st.multiselect("🧭 Uzun Vadeli Hedefler", hedefler["UZUN_VADELI_HEDEFLER"])
+    teach_selected = st.multiselect("📖 Öğretimsel Hedefler", hedefler["OGRETIMSEL_HEDEFLER"])
     
     if st.button("📄 Word Belgesi Oluştur"):
         if not teacher or not student:
