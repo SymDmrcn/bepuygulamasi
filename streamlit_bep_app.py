@@ -11,7 +11,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # Cache'e TTL ekle (5 dakikada bir yenilenir)
-@st.cache_data(ttl=300)  # 300 saniye = 5 dakika
+@st.cache_data(ttl=30)
 def verileri_cek():
     hedefler_ref = db.collection('hedefler')
     docs = hedefler_ref.stream()
