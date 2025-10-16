@@ -10,8 +10,8 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Cache'e TTL ekle (30 saniyede bir yenilenir)
-@st.cache_data(ttl=30)
+# Cache'e TTL ekle (5 saniyede bir yenilenir - geliştirme için)
+@st.cache_data(ttl=5)
 def verileri_cek():
     hedefler_ref = db.collection('hedefler')
     docs = hedefler_ref.stream()
@@ -33,6 +33,11 @@ def verileri_cek():
         kisa_vadeli.extend(data.get("kisa_vadeli_hedefler", []))
         kisa_vadeli.extend(data.get("kısa_vadeli_hedefler", []))
         
+        # Uzun vadeli hedefleri birleştir
+        uzun_vadeli = []
+        uzun_vadeli.extend(data.get("uzun_vadeli_hedefler", []))
+        uzun_vadeli.extend(data.get("uzak_vadeli_hedefler", []))
+        
         # Öğretimsel hedefleri birleştir  
         ogretimsel = []
         ogretimsel.extend(data.get("ogretimsel_hedefler", []))
@@ -40,7 +45,7 @@ def verileri_cek():
         
         grouped_data[grup][ders] = {
             "KISA_VADELI_HEDEFLER": list(set(kisa_vadeli)),  # Dublicateleri kaldır
-            "UZUN_VADELI_HEDEFLER": data.get("uzun_vadeli_hedefler", []),
+            "UZUN_VADELI_HEDEFLER": list(set(uzun_vadeli)),  # Dublicateleri kaldır
             "OGRETIMSEL_HEDEFLER": list(set(ogretimsel))  # Dublicateleri kaldır
         }
     
@@ -55,7 +60,20 @@ if st.sidebar.button("🔄 Verileri Yenile"):
     st.cache_data.clear()
     st.rerun()
 
+# Debug bilgileri (geliştirme aşamasında)
+if st.sidebar.checkbox("🔍 Debug Modu"):
+    st.sidebar.write("**Cache Durumu:**")
+    st.sidebar.write(f"Cache TTL: 30 saniye")
+    
 grouped_data = verileri_cek()
+
+# Debug modu aktifse verileri göster
+if st.sidebar.checkbox("🔍 Debug Modu"):
+    st.sidebar.write("**Bulunan Gruplar:**")
+    for grup in grouped_data.keys():
+        st.sidebar.write(f"- {grup}")
+        for ders in grouped_data[grup].keys():
+            st.sidebar.write(f"  └─ {ders}")
 
 teacher = st.text_input("👩‍🏫 Öğretmen Adı")
 student = st.text_input("👧 Öğrenci Adı")
