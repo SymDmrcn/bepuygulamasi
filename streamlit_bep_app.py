@@ -61,14 +61,15 @@ if st.sidebar.button("🔄 Verileri Yenile"):
     st.rerun()
 
 # Debug bilgileri (geliştirme aşamasında)
-if st.sidebar.checkbox("🔍 Debug Modu"):
+debug_mode = st.sidebar.checkbox("🔍 Debug Modu")
+if debug_mode:
     st.sidebar.write("**Cache Durumu:**")
-    st.sidebar.write(f"Cache TTL: 30 saniye")
+    st.sidebar.write(f"Cache TTL: 5 saniye")
     
 grouped_data = verileri_cek()
 
 # Debug modu aktifse verileri göster
-if st.sidebar.checkbox("🔍 Debug Modu"):
+if debug_mode:
     st.sidebar.write("**Bulunan Gruplar:**")
     for grup in grouped_data.keys():
         st.sidebar.write(f"- {grup}")
